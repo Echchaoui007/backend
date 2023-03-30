@@ -1,77 +1,61 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Api;
 
+use App\Http\Controllers\Controller;
 use App\Models\Admin;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
-use Illuminate\Support\Facades\Hash;
 
 class AdminController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
-        //
+        $admins = Admin::all();
+        return response()->json($admins);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
+    public function store(Request $request)
     {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request): Response
-    {
-        $data=$request->validate([
-            "name" =>'required|string',
-            "email"=>'required|email',
-            "password"=>'required|string'
+        $request->validate([
+            'name' => 'required',
+            'email' => 'required|email|unique:admins',
+            'password' => 'required|min:8',
         ]);
+
         $admin = Admin::create([
-            "name" =>$data["name"],
-            "email"=>$data["email"],
-            "password"=>bcrypt($data["password"])
+            'name' => $request->name,
+            'email' => $request->email,
+            'password' => bcrypt($request->password),
         ]);
-        return response($admin, 200);
+
+        return response()->json($admin, 201);
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Admin $adminModel)
+    public function show(Admin $admin)
     {
-        //
+        return response()->json($admin);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Admin $adminModel)
+    public function update(Request $request, Admin $admin)
     {
-        //
+        $request->validate([
+            'name' => 'required',
+            'email' => 'required|email|unique:admins,email,' . $admin->id,
+            'password' => 'sometimes|min:8',
+        ]);
+
+        $admin->update([
+            'name' => $request->name,
+            'email' => $request->email,
+            'password' => $request->filled('password') ? bcrypt($request->password) : $admin->password,
+        ]);
+
+        return response()->json($admin);
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Admin $adminModel)
+    public function destroy(Admin $admin)
     {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Admin $adminModel)
-    {
-        //
+        $admin->delete();
+        return response()->json(null, 204);
     }
 }

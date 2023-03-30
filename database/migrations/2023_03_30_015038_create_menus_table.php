@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\restourant;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -15,13 +16,12 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->text('description');
+            $table->foreignIdFor(restourant::class)->constrained('restourants')->cascadeOnDelete();
             $table->decimal('price', 8, 2);
             $table->string('image')->nullable();
             $table->unsignedBigInteger('restaurant_id');
             $table->timestamps();
 
-            // Foreign key constraint
-            $table->foreign('restaurant_id')->references('id')->on('restaurants')->onDelete('cascade');
         });
     }
 
